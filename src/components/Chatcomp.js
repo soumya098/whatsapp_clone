@@ -6,10 +6,41 @@ import {
   MoreVert,
   SearchOutlined,
 } from "@material-ui/icons";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../chat.css";
+import axios from "../axios";
 
-function Chatcomp() {
+function Chatcomp({ messages }) {
+  const [input, setInput] = useState("");
+  const messagesEndRef = React.useRef(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const sendmsg = async (event) => {
+    event.preventDefault();
+    await axios
+      .post("/messages/new", {
+        message: input,
+        name: "jr",
+        timestamp: "just now",
+        recieved: false,
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    setInput("");
+  };
+
+  const renderMsg = messages.map((message, index) => (
+    <p key={index} className={`chat__msg ${message.recieved && "chat__rsv"}`}>
+      <span className="chat__name">{message.name}</span>
+      {message.message}
+      <span className="chat__timestamp">{message.timestamp}</span>
+    </p>
+  ));
+
   return (
     <div className="chat">
       <div className="chat__header">
@@ -31,26 +62,22 @@ function Chatcomp() {
         </div>
       </div>
       <div className="chat__body">
-        <p className="chat__msg">
-          <span className="chat__name">name</span>
-          this is a message
-          <span className="chat__timestamp">{new Date().toUTCString()}</span>
-        </p>
-        <p className="chat__msg chat__rsv">
-          <span className="chat__name">name</span>
-          this is a message
-          <span className="chat__timestamp">{new Date().toUTCString()}</span>
-        </p>
+        {renderMsg}
+        <div ref={messagesEndRef} />
       </div>
       <div className="chat__footer">
         <InsertEmoticon />
         <form>
           <input
             type="text"
-            placeholder="type a message"
+            placeholder="Type a message..."
             className="chat__input"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
           />
-          <button type="submit">send a message</button>
+          <button type="submit" onClick={sendmsg}>
+            send a message
+          </button>
         </form>
         <MicRounded />
       </div>
