@@ -1,16 +1,20 @@
 import "./App.css";
 import Chatcomp from "./components/Chatcomp";
 import Sidebar from "./components/Sidebar";
+
 import Pusher from "pusher-js";
 import { useEffect, useState } from "react";
 import axios from "./axios";
+import { Route, Router, Switch, withRouter } from "react-router-dom";
+import LoginComp from "./components/LoginComp";
+import { useDispatch, useSelector } from "react-redux";
 
 function App() {
   const [msgs, setMsgs] = useState([]);
-  const [user, setUser] = useState(null);
+  const user = useSelector((store) => store);
 
   useEffect(() => {
-    axios.get("/messages/sync").then((res) => {
+    axios.get("/app/messages/sync").then((res) => {
       console.log(res.data);
       setMsgs(res.data);
     });
@@ -33,14 +37,30 @@ function App() {
   }, [msgs]);
 
   console.log(msgs);
-  return (
+  console.log(user);
+
+  return user ? (
     <div className="app">
       <div className="app__body">
-        <Sidebar />
-        <Chatcomp messages={msgs} />
+        <Switch>
+          <Route path="/app/rooms/:roomId">
+            <Sidebar user={user.user.user} />
+            <Chatcomp messages={msgs} />
+          </Route>
+          <Route path="/app">
+            <Sidebar user={user.user.user} />
+          </Route>
+          <Route path="/">
+            <Sidebar user={user.user.user} />
+          </Route>
+        </Switch>
       </div>
+    </div>
+  ) : (
+    <div className="app">
+      <LoginComp />
     </div>
   );
 }
 
-export default App;
+export default withRouter(App);

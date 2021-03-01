@@ -8,11 +8,11 @@ import SidebarChat from "./SidebarChat";
 import axios from "../axios";
 import Pusher from "pusher-js";
 
-function Sidebar() {
+function Sidebar({ user }) {
   const [rooms, setRooms] = useState([]);
 
   useEffect(() => {
-    axios.get("/rooms/sync").then((res) => {
+    axios.get("/app/rooms/sync").then((res) => {
       console.log(res.data);
       setRooms(res.data);
     });
@@ -35,15 +35,16 @@ function Sidebar() {
   }, [rooms]);
   console.log(rooms);
   const renderRooms = rooms.map((room, index) => (
-    <SidebarChat key={index} roomName={room.name} />
+    <SidebarChat key={index} roomName={room.name} id={room._id || room.id} />
   ));
   return (
     <div className="sidebar">
       <div className="sidebar__header">
         <div className="sidebar__headerLeft">
           <IconButton>
-            <Avatar src="https://ootdmagazine.com/wp-content/uploads/2015/02/10-Reasons-Why-Guys-love-nerdy-Girls-OOTD-Magazine.jpg" />
+            <Avatar src={user.photoURL} />
           </IconButton>
+          <div className="sidebar__username">{user.displayName}</div>
         </div>
         <div className="sidebar__headerRight">
           <IconButton>
